@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="The Human–VLA Communication Gap: What Humans Leave Implicit and What Policies Cannot Recover">
+  <meta name="keywords" content="Vision-Language-Action Models, Human-Robot Communication, Task Specification, Robot Learning">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Human–VLA Communication Gap</title>
+
+  <meta property="og:title" content="The Human–VLA Communication Gap">
+  <meta property="og:description" content="What humans leave implicit and what VLA policies cannot recover.">
+  <meta property="og:image" content="./static/images/main_figure.jpg">
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">The Human&ndash;VLA Communication Gap</h1>
+          <h2 class="subtitle is-3 publication-subtitle">What Humans Leave Implicit and What Policies Cannot Recover</h2>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Yiqing Xu,</span>
+            <span class="author-block">Jiajun Wu</span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Computer Science, Stanford University</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- TODO: add links once available and remove "is-static". -->
+              <span class="link-block">
+                <a class="external-link button is-normal is-rounded is-dark is-static" title="Coming soon">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper (soon)</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="#video" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-youtube"></i></span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="external-link button is-normal is-rounded is-dark is-static" title="Coming soon">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code (soon)</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img src="./static/images/main_figure.jpg" alt="Human–VLA communication gap overview" class="figure-img">
+      <figcaption class="subtitle has-text-centered teaser-caption">
+        A robot may know how to perform a task yet fail when a human asks for it naturally.
+        For the same physical task, human specifications vary in <em>task content</em>, <em>reference</em>, and
+        <em>composition</em>, producing substantially different VLA performance (top). We separate this mismatch
+        into an <span class="gap-info">information gap</span>, where task semantics, grounding, or event structure
+        remain unresolved, and a residual <span class="gap-exec">execution gap</span>, where the fully resolved task
+        remains sensitive to command organization and invocation state (bottom).
+      </figcaption>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            A robot may know how to perform a task yet fail when a human asks for it naturally. We study this
+            human&ndash;VLA communication gap by separating an <em>information gap</em>, where task semantics,
+            grounding, or event structure remain unresolved, from a residual <em>execution gap</em>, where even a
+            fully specified task depends on how it is organized and invoked. To do this, we characterize how people
+            naturally express demonstrated objectives and evaluate controlled variants of the same physical tasks,
+            with detailed analysis on $\pi_{0.5}$ and consistent trends on $\pi_0$-FAST and Cosmos3-Edge. Our study
+            reveals that humans increasingly compress instructions as tasks grow, relying more on contextual
+            grounding and implicit execution structure. Current policies are misaligned with this behavior: they
+            tolerate grounding dependence relatively well, but struggle when task semantics or event structure must
+            be reconstructed. Even after the information gap is resolved, execution remains sensitive to command
+            granularity and invocation state. These findings identify concrete targets for human-centered policy
+            learning and interfaces that better bridge natural human objectives to robot behavior.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="video">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <video controls playsinline preload="metadata" poster="./static/images/video_poster.jpg" class="paper-video">
+          <source src="./static/videos/commgap.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <!-- Two gaps. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Two Gaps Between a Human and a VLA</h2>
+        <div class="content has-text-justified">
+          <p>
+            Ask a robot <em>&ldquo;Can you clear the table so I can work here?&rdquo;</em> and it may freeze, even
+            though the same policy succeeds on <em>&ldquo;Pick up the white mug and place it in the bin.&rdquo;</em>
+            What failed was not the physical skill but the interface to it. We study this communication gap through
+            two mismatches:
+          </p>
+        </div>
+        <div class="columns gap-cards">
+          <div class="column">
+            <div class="gap-card gap-card-info">
+              <p class="gap-card-title">Information gap</p>
+              <p>A natural specification leaves some of the executable task structure unstated (what to do, on
+                which object, toward what target, as which sequence of events) and the policy must recover it.</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="gap-card gap-card-exec">
+              <p class="gap-card-title">Execution gap</p>
+              <p>Even a complete specification may fail if its resolved events are organized or invoked outside the
+                policy's learned execution interface.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taxonomy. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">How People Specify Objectives</h2>
+        <div class="content has-text-justified">
+          <p>
+            We asked 50 participants to watch task demonstrations and write the instruction they would give another
+            human, yielding 750 specifications. Informed by these instructions and prior work on situated
+            instruction, we derive a taxonomy that factors any specification by three axes. All examples below
+            describe the <em>same</em> physical task; highlighted spans mark the varied element.
+          </p>
+        </div>
+        <div class="table-wrap">
+          <table class="table is-fullwidth taxonomy-table">
+            <thead>
+              <tr><th>Factor</th><th>Form</th><th>Example</th></tr>
+            </thead>
+            <tbody>
+              <tr class="group-start"><th rowspan="3">Task content</th>
+                <td class="form">Action</td>
+                <td class="ex">&ldquo;<span class="vary">Put</span> all the yellow objects in the left bin and all the blue objects in the right bin.&rdquo;</td></tr>
+              <tr><td class="form">Outcome</td>
+                <td class="ex">&ldquo;All yellow objects <span class="vary">should be in</span> the left bin, and all blue objects <span class="vary">should be in</span> the right bin.&rdquo;</td></tr>
+              <tr><td class="form">Intent / preference</td>
+                <td class="ex">&ldquo;<span class="vary">I want the objects sorted by color</span>.&rdquo;</td></tr>
+              <tr class="group-start"><th rowspan="3">Reference form</th>
+                <td class="form">Direct</td>
+                <td class="ex">&ldquo;Put the yellow mug in <span class="vary">the left bin</span> and the blue cup in <span class="vary">the right bin</span>.&rdquo;</td></tr>
+              <tr><td class="form">Grounding-dependent</td>
+                <td class="ex">&ldquo;Put the yellow mug in <span class="vary">the bin on the left</span> and the blue cup in <span class="vary">the bin on the right</span>.&rdquo;</td></tr>
+              <tr><td class="form">Missing</td>
+                <td class="ex">&ldquo;Put the yellow mug and the blue cup away.&rdquo; <span class="note">(destination omitted)</span></td></tr>
+              <tr class="group-start"><th rowspan="3">Composition</th>
+                <td class="form">Enumerated</td>
+                <td class="ex">&ldquo;Put <span class="vary">the yellow mug</span> in the left bin, then put <span class="vary">the yellow bowl</span> in the left bin, then put <span class="vary">the blue cup</span> in the right bin.&rdquo;</td></tr>
+              <tr><td class="form">Grouped</td>
+                <td class="ex">&ldquo;Put <span class="vary">the yellow mug and bowl</span> in the left bin, and <span class="vary">the blue cup and plate</span> in the right bin.&rdquo;</td></tr>
+              <tr><td class="form">Collective</td>
+                <td class="ex">&ldquo;Put <span class="vary">all the yellow objects</span> in the left bin and <span class="vary">all the blue objects</span> in the right bin.&rdquo;</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Measuring. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Measuring the Communication Gap</h2>
+        <div class="content has-text-justified">
+          <p>
+            From each demonstration we recover an ordered sequence of grounded manipulation events
+            $E_\tau=(e_1,\ldots,e_{K_\tau})$, with $e_k=(A_k,O_k,D_k)$ an action, object, and destination. This shared
+            representation lets us compare any human specification $u$ against a fully resolved, policy-facing
+            command built from templates mined from the policy's robot-training language.
+            For each specification we measure:
+          </p>
+          <ul>
+            <li><strong>Semantic coverage</strong> $\eta_\tau(u)$: the fraction of required action / object /
+              destination components that are stated at all.</li>
+            <li><strong>Groundedness</strong> $\gamma_\tau(u)$: the fraction whose grounded values are given
+              directly in language, rather than resolved from scene context.</li>
+            <li><strong>Decomposition</strong> $\delta_\tau(u)=J_\tau(u)/K_\tau$: how many of the atomic events are
+              individually expressed.</li>
+          </ul>
+        </div>
+        <img src="./static/images/information_gap_example.jpg" alt="Quantifying the information gap" class="figure-img">
+        <figcaption class="has-text-centered figure-caption">
+          The same physical task specified four ways. Less explicit specifications expose less executable
+          structure, and VLA success drops accordingly.
+        </figcaption>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section findings">
+  <div class="container is-max-desktop">
+
+    <!-- Q1. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <p class="finding-label">Finding 1</p>
+        <h2 class="title is-3">Humans Compress as Tasks Grow</h2>
+        <div class="stat-row">
+          <div class="stat"><span class="stat-num">9.1 &rarr; 15.8</span><span class="stat-desc">words per instruction<br>(1 event &rarr; 3+ events)</span></div>
+          <div class="stat"><span class="stat-num">0.89 &rarr; 0.27</span><span class="stat-desc">groundedness $\gamma_\tau$</span></div>
+          <div class="stat"><span class="stat-num">1.00 &rarr; 0.21</span><span class="stat-desc">decomposition $\delta_\tau$</span></div>
+        </div>
+        <img src="./static/images/human_compression.png" alt="Human compression with task complexity" class="figure-img figure-narrow">
+        <div class="content has-text-justified">
+          <p>
+            People do not communicate more complex objectives by proportionally lengthening their instructions.
+            Instruction length grows sublinearly with the number of required events, while the executable structure
+            made explicit declines sharply. People preserve much of the task content but increasingly rely on the
+            listener to resolve referents and, especially, to expand a compact expression into atomic manipulations.
+            This compression is <em>structure-dependent</em>: weakly structured tasks stay enumerative, while
+            rule-compressible tasks shift toward outcome-level and collective descriptions.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <p class="finding-label">Finding 2</p>
+        <h2 class="title is-3">VLAs Are Selectively Sensitive to What Is Left Implicit</h2>
+        <div class="content has-text-justified">
+          <p>
+            What matters is not simply <em>how much</em> information is unresolved, but <em>what</em> must be
+            recovered. Policies tolerate grounding-dependent references well, but pay much more when task semantics
+            or event structure must be reconstructed. Each undecomposed event costs about as much as a missing
+            action, object, or destination.
+          </p>
+        </div>
+        <img src="./static/images/information_gap.png" alt="Behavioral cost of unresolved task structure" class="figure-img">
+        <figcaption class="has-text-centered figure-caption">
+          <strong>Left:</strong> for all three policies, grounding dependence is cheap, while missing
+          components and undecomposed events cost far more. <strong>Right:</strong> as tasks grow, coverage and
+          decomposition become more strongly associated with the success gap than groundedness.
+        </figcaption>
+
+        <h3 class="title is-5 table-title">$\pi_{0.5}$ success across the full factorial space of specifications</h3>
+        <div class="table-wrap">
+          <table class="table is-fullwidth results-table">
+            <thead>
+              <tr>
+                <th rowspan="2">Content</th><th rowspan="2">Reference</th>
+                <th rowspan="2">$\eta_\tau$</th><th rowspan="2">$\gamma_\tau$</th>
+                <th colspan="2">Enumerated<br><small>$\bar\delta=1.00$, $N=120$</small></th>
+                <th colspan="2">Grouped<br><small>$\bar\delta=0.47$, $N=54$</small></th>
+                <th colspan="2">Collective<br><small>$\bar\delta=0.41$, $N=50$</small></th>
+              </tr>
+              <tr>
+                <th>Succ.</th><th>$\Delta^{\text{info}}$</th>
+                <th>Succ.</th><th>$\Delta^{\text{info}}$</th>
+                <th>Succ.</th><th>$\Delta^{\text{info}}$</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+        <p class="table-caption">
+          Success (%) and information-gap penalty $\Delta^{\text{info}}_{\text{Success}}$ (points below the fully
+          specified Action&ndash;Direct&ndash;Enumerated reference). Darker red marks a larger gap; bold marks
+          one-factor ablations from the reference. Means over task-level averages; see the paper for 95% CIs.
+        </p>
+      </div>
+    </div>
+
+    <!-- Q3. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <p class="finding-label">Finding 3</p>
+        <h2 class="title is-3">A Residual Execution Gap Remains</h2>
+        <div class="content has-text-justified">
+          <p>
+            Is complete executable information sufficient? We fix every compound task to the same fully resolved
+            Action&ndash;Direct&ndash;Enumerated event sequence and vary only how its events are presented and
+            invoked. No task information is added, yet issuing events one at a time, and resetting the arm to a
+            familiar home pose between them, substantially improves execution for all three policies.
+          </p>
+        </div>
+        <div class="exec-bars">
+          <div class="exec-row">
+            <span class="exec-label">One prompt upfront</span>
+            <span class="exec-track"><span class="exec-fill" style="width: 23.5%"></span></span>
+            <span class="exec-val">23.5%</span>
+          </div>
+          <div class="exec-row">
+            <span class="exec-label">Sequential, one event at a time</span>
+            <span class="exec-track"><span class="exec-fill" style="width: 35.6%"></span></span>
+            <span class="exec-val">35.6%</span>
+          </div>
+          <div class="exec-row">
+            <span class="exec-label">Sequential + home reset</span>
+            <span class="exec-track"><span class="exec-fill" style="width: 47.4%"></span></span>
+            <span class="exec-val">47.4%</span>
+          </div>
+          <p class="exec-note">$\pi_{0.5}$ success on compound tasks with identical grounded semantics.</p>
+        </div>
+        <img src="./static/images/alignment_gap.png" alt="Residual execution gap across policies" class="figure-img figure-narrow">
+        <figcaption class="has-text-centered figure-caption">
+          Sequential execution improves success and partial progress over a single upfront prompt for all three
+          policies; a home reset between events adds a further gain.
+        </figcaption>
+      </div>
+    </div>
+
+    <!-- Rollouts. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Example Rollouts</h2>
+        <img src="./static/images/example_figure.jpg" alt="Example rollouts of the information and execution gaps" class="figure-img">
+        <figcaption class="has-text-centered figure-caption">
+          <strong>Left:</strong> the policy succeeds when object identity or action is implicit, but fails when task
+          semantics must be inferred. <strong>Right:</strong> multi-step execution can fail through incorrect object
+          selection; returning to a home pose between subtasks enables completion.
+        </figcaption>
+      </div>
+    </div>
+
+    <!-- Three policies. -->
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Three Policies, One Gap, Different Weak Points</h2>
+        <div class="content has-text-justified">
+          <p>
+            Across $\pi_{0.5}$, $\pi_0$-FAST, and the world-action model Cosmos3-Edge, the same pattern holds, but
+            each component of the gap traces back to a different part of the model:
+          </p>
+          <ul>
+            <li><strong>Grounding</strong> is inherited from the vision&ndash;language backbone: Cosmos3-Edge pays
+              the least for grounding-dependent references.</li>
+            <li><strong>Organization</strong> comes from the robot-language distribution: the sequentialization gain
+              is shared by all DROID-trained policies, and largest for $\pi_0$-FAST (8.2% &rarr; 19.5%).</li>
+            <li><strong>Invocation state</strong> depends on the action-generation paradigm: Cosmos3-Edge gains 5.8
+              points from a home reset against 11.8 for $\pi_{0.5}$.</li>
+            <li><strong>Structural reconstruction</strong>, the component humans rely on most as tasks grow, is
+              unaddressed by all three, which makes it the primary target for policy learning.</li>
+          </ul>
+          <p>
+            Generalist robots should adapt to how people communicate, rather than requiring people to adapt to the
+            robot's learned interface.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>
+            This website is licensed under a <a rel="license"
+              href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0
+              International License</a>. It borrows the <a href="https://github.com/nerfies/nerfies.github.io">source
+              code</a> of the Nerfies website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Factorial results for pi_0.5: [content, reference, eta, gamma, [succ, gap] x 3 compositions].
+  // Bold cells mark one-factor ablations from the Action-Direct-Enumerated reference.
+  (function () {
+    var rows = [
+      ['Action',  'Direct',         '1.00', '1.00', [38.0, 0.0],  [15.9, 7.6, 1],  [13.1, 10.4, 1]],
+      ['',        'Grounding-dep.', '1.00', '0.33', [35.2, 2.8, 1], [13.5, 10.0], [12.4, 11.1]],
+      ['',        'Missing',        '0.33', '0.33', [26.9, 11.1, 1], [7.1, 16.4], [6.5, 17.0]],
+      ['Outcome', 'Direct',         '0.67', '0.67', [33.5, 4.5, 1], [11.8, 11.7], [9.7, 13.8]],
+      ['',        'Grounding-dep.', '0.67', '0.00', [31.6, 6.4],  [10.0, 13.5],  [9.2, 14.3]],
+      ['',        'Missing',        '0.00', '0.00', [24.6, 13.4], [5.3, 18.2],   [4.9, 18.6]],
+      ['Intent',  'Direct',         '0.33', '0.33', [22.8, 15.2, 1], [5.3, 18.2], [4.3, 19.2]],
+      ['',        'Grounding-dep.', '0.33', '0.00', [22.1, 15.9], [4.7, 18.8],   [4.3, 19.2]],
+      ['',        'Missing',        '0.00', '0.00', [18.8, 19.3], [3.2, 20.3],   [2.9, 20.6]]
+    ];
+    var body = document.getElementById('results-body');
+    var html = '';
+    rows.forEach(function (r, i) {
+      html += '<tr' + (r[0] ? ' class="group-start"' : '') + '>';
+      html += r[0] ? '<th rowspan="3">' + r[0] + '</th>' : '';
+      html += '<td class="ref-cell">' + r[1] + '</td>';
+      [r[2], r[3]].forEach(function (v) {
+        html += '<td class="num" style="--a:' + (parseFloat(v) * 0.35) + '">' + v + '</td>';
+      });
+      [r[4], r[5], r[6]].forEach(function (c) {
+        var gap = c[1] === 0 ? '0.0 <small>(ref.)</small>' : c[1].toFixed(1);
+        if (c[2]) gap = '<strong>' + gap + '</strong>';
+        html += '<td class="num">' + c[0].toFixed(1) + '</td>';
+        html += '<td class="num gap" style="--g:' + (c[1] / 33).toFixed(2) + '">' + gap + '</td>';
+      });
+      html += '</tr>';
+    });
+    body.innerHTML = html;
+  })();
+</script>
+
+</body>
+</html>
